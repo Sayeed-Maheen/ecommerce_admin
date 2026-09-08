@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../../core/errors/app_exception.dart';
 import '../../domain/entities/admin_user.dart';
 import '../../domain/usecases/login_use_case.dart';
 import '../../domain/usecases/logout_use_case.dart';
@@ -15,7 +16,7 @@ class AuthController extends GetxController {
   final isLoading = false.obs;
   final errorMessage = ''.obs;
 
-  Future<void> login({required String email, required String password}) async {
+  Future<bool> login({required String email, required String password}) async {
     try {
       isLoading.value = true;
       errorMessage.value = '';
@@ -23,22 +24,35 @@ class AuthController extends GetxController {
       final user = await loginUseCase(email: email, password: password);
 
       currentUser.value = user;
-    } catch (e) {
-      errorMessage.value = e.toString();
+
+      return true;
+    } on AppException catch (e) {
+      errorMessage.value = e.message;
+      return false;
+    } catch (_) {
+      errorMessage.value = 'Something went wrong. Please try again.';
+      return false;
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> logout() async {
+  Future<bool> logout() async {
     try {
       isLoading.value = true;
+      errorMessage.value = '';
 
       await logoutUseCase();
 
       currentUser.value = null;
-    } catch (e) {
-      errorMessage.value = e.toString();
+
+      return true;
+    } on AppException catch (e) {
+      errorMessage.value = e.message;
+      return false;
+    } catch (_) {
+      errorMessage.value = 'Unable to logout. Please try again.';
+      return false;
     } finally {
       isLoading.value = false;
     }
