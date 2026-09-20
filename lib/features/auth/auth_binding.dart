@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce_admin/features/auth/domain/usecases/authorize_admin_use_case.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
@@ -11,16 +13,24 @@ import 'presentation/controllers/auth_controller.dart';
 class AuthBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(FirebaseAuth.instance));
+    Get.lazyPut<AuthRemoteDataSource>(
+      () => AuthRemoteDataSourceImpl(FirebaseAuth.instance, FirebaseFirestore.instance),
+    );
 
     Get.lazyPut<AuthRepository>(() => AuthRepositoryImpl(Get.find<AuthRemoteDataSource>()));
 
     Get.lazyPut<LoginUseCase>(() => LoginUseCase(Get.find<AuthRepository>()));
 
+    Get.lazyPut<AuthorizeAdminUseCase>(() => AuthorizeAdminUseCase(Get.find<AuthRepository>()));
+
     Get.lazyPut<LogoutUseCase>(() => LogoutUseCase(Get.find<AuthRepository>()));
 
     Get.lazyPut<AuthController>(
-      () => AuthController(Get.find<LoginUseCase>(), Get.find<LogoutUseCase>()),
+      () => AuthController(
+        Get.find<AuthorizeAdminUseCase>(),
+        Get.find<LoginUseCase>(),
+        Get.find<LogoutUseCase>(),
+      ),
     );
   }
 }

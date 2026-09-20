@@ -1,3 +1,4 @@
+import 'package:ecommerce_admin/features/auth/domain/usecases/authorize_admin_use_case.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/errors/app_exception.dart';
@@ -6,10 +7,11 @@ import '../../domain/usecases/login_use_case.dart';
 import '../../domain/usecases/logout_use_case.dart';
 
 class AuthController extends GetxController {
+  final AuthorizeAdminUseCase authorizeAdminUseCase;
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;
 
-  AuthController(this.loginUseCase, this.logoutUseCase);
+  AuthController(this.authorizeAdminUseCase, this.loginUseCase, this.logoutUseCase);
 
   final Rxn<AdminUser> currentUser = Rxn<AdminUser>();
 
@@ -23,9 +25,20 @@ class AuthController extends GetxController {
 
       final user = await loginUseCase(email: email, password: password);
 
-      currentUser.value = user;
+      try {
+        final authorizedUser = await authorizeAdminUseCase(uid: user.id, email: user.email);
 
-      return true;
+        currentUser.value = authorizedUser;
+
+        return true;
+      } on AppException catch (e) {
+        await logoutUseCase();
+
+        currentUser.value = null;
+        errorMessage.value = e.message;
+
+        return false;
+      }
     } on AppException catch (e) {
       errorMessage.value = e.message;
       return false;

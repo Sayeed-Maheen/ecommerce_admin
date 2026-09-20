@@ -17,7 +17,6 @@ class AppRouter {
         path: AppRoutes.login,
         builder: (context, state) {
           AuthBinding().dependencies();
-
           return const LoginPage();
         },
       ),

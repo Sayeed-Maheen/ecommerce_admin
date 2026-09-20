@@ -8,6 +8,12 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.dataSource);
 
   @override
+  Future<AdminUser> authorizeAdmin({required String uid, required String email}) async {
+    final model = await dataSource.authorizeAdmin(uid: uid, email: email);
+    return model.toEntity();
+  }
+
+  @override
   Future<AdminUser> login({required String email, required String password}) async {
     final model = await dataSource.login(email: email, password: password);
 
