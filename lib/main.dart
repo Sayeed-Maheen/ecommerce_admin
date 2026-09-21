@@ -1,3 +1,4 @@
+import 'package:ecommerce_admin/features/auth/auth_binding.dart';
 import 'package:ecommerce_admin/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,8 @@ Future<void> main() async {
   Get.put<SharedPreferences>(preferences, permanent: true);
 
   InitialBindings().dependencies();
+
+  AuthBinding().dependencies();
 
   runApp(const EcommerceAdminApp());
 }

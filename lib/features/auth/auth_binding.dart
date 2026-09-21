@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_admin/features/auth/domain/usecases/authorize_admin_use_case.dart';
+import 'package:ecommerce_admin/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
@@ -19,6 +20,8 @@ class AuthBinding extends Bindings {
 
     Get.lazyPut<AuthRepository>(() => AuthRepositoryImpl(Get.find<AuthRemoteDataSource>()));
 
+    Get.lazyPut<GetCurrentUserUseCase>(() => GetCurrentUserUseCase(Get.find<AuthRepository>()));
+
     Get.lazyPut<LoginUseCase>(() => LoginUseCase(Get.find<AuthRepository>()));
 
     Get.lazyPut<AuthorizeAdminUseCase>(() => AuthorizeAdminUseCase(Get.find<AuthRepository>()));
@@ -30,6 +33,7 @@ class AuthBinding extends Bindings {
         Get.find<AuthorizeAdminUseCase>(),
         Get.find<LoginUseCase>(),
         Get.find<LogoutUseCase>(),
+        Get.find<GetCurrentUserUseCase>(),
       ),
     );
   }

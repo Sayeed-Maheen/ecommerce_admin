@@ -1,4 +1,5 @@
 import 'package:ecommerce_admin/features/auth/domain/usecases/authorize_admin_use_case.dart';
+import 'package:ecommerce_admin/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/errors/app_exception.dart';
@@ -10,13 +11,26 @@ class AuthController extends GetxController {
   final AuthorizeAdminUseCase authorizeAdminUseCase;
   final LoginUseCase loginUseCase;
   final LogoutUseCase logoutUseCase;
+  final GetCurrentUserUseCase getCurrentUserUseCase;
 
-  AuthController(this.authorizeAdminUseCase, this.loginUseCase, this.logoutUseCase);
+  AuthController(
+    this.authorizeAdminUseCase,
+    this.loginUseCase,
+    this.logoutUseCase,
+    this.getCurrentUserUseCase,
+  );
 
   final Rxn<AdminUser> currentUser = Rxn<AdminUser>();
 
   final isLoading = false.obs;
   final errorMessage = ''.obs;
+  final isRestoringSession = true.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    restoreSession();
+  }
 
   Future<bool> login({required String email, required String password}) async {
     try {
@@ -68,6 +82,28 @@ class AuthController extends GetxController {
       return false;
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> restoreSession() async {
+    try {
+      final user = await getCurrentUserUseCase();
+
+      if (user == null) {
+        return;
+      }
+
+      final authorizedUser = await authorizeAdminUseCase(uid: user.id, email: user.email);
+
+      currentUser.value = authorizedUser;
+    } on AppException {
+      await logoutUseCase();
+      currentUser.value = null;
+    } catch (_) {
+      await logoutUseCase();
+      currentUser.value = null;
+    } finally {
+      isRestoringSession.value = false;
     }
   }
 }
