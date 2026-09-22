@@ -48,6 +48,57 @@ class CategoriesPage extends GetView<CategoryController> {
                     : const Icon(Icons.category),
                 title: Text(category.name),
                 subtitle: Text(category.isActive ? 'Active' : 'Inactive'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        context.push('/categories/edit/${category.id}', extra: category);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Delete Category'),
+                              content: Text('Are you sure you want to delete "${category.name}"?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(true);
+                                  },
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (confirmed != true) {
+                          return;
+                        }
+
+                        final success = await controller.deleteCategory(category.id);
+
+                        if (!success && context.mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(controller.errorMessage.value)));
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
             );
           },

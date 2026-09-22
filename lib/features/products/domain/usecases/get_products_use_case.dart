@@ -7,8 +7,6 @@ class GetProductsUseCase {
   GetProductsUseCase(this.repository);
 
   Future<List<Product>> call() async {
-    final products = await repository.getProducts();
-
-    return products.where((product) => product.isActive).toList();
+    return await repository.getProducts();
   }
 }

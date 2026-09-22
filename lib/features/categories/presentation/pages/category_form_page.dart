@@ -5,9 +5,10 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 class CategoryForm extends StatefulWidget {
-  const CategoryForm({super.key, required this.onSubmit});
+  const CategoryForm({super.key, required this.onSubmit, this.category});
 
   final Future<void> Function(String name, bool isActive) onSubmit;
+  final Category? category;
 
   @override
   State<CategoryForm> createState() => _CategoryFormState();
@@ -19,6 +20,16 @@ class _CategoryFormState extends State<CategoryForm> {
 
   bool _isActive = true;
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.category != null) {
+      _nameController.text = widget.category!.name;
+      _isActive = widget.category!.isActive;
+    }
+  }
 
   @override
   void dispose() {
@@ -96,19 +107,23 @@ class _CategoryFormState extends State<CategoryForm> {
 }
 
 class CategoryFormPage extends GetView<CategoryController> {
-  const CategoryFormPage({super.key});
+  const CategoryFormPage({super.key, this.category});
 
+  final Category? category;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Category')),
+      appBar: AppBar(title: Text(category == null ? 'Add Category' : 'Edit Category')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: CategoryForm(
+          category: category,
           onSubmit: (name, isActive) async {
-            final success = await controller.createCategory(
-              Category(id: '', name: name, isActive: isActive),
-            );
+            final categoryToSave = Category(id: category?.id ?? '', name: name, isActive: isActive);
+
+            final success = category == null
+                ? await controller.createCategory(categoryToSave)
+                : await controller.updateCategory(categoryToSave);
 
             if (success && context.mounted) {
               context.pop();
