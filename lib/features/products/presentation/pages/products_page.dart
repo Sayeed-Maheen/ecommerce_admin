@@ -51,11 +51,56 @@ class ProductsPage extends GetView<ProductController> {
                   '${product.price.toStringAsFixed(2)} • '
                   '${product.isActive ? 'Active' : 'Inactive'}',
                 ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    context.push('/products/edit/${product.id}', extra: product);
-                  },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        context.push('/products/edit/${product.id}', extra: product);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Delete Product'),
+                              content: Text('Are you sure you want to delete "${product.name}"?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(true);
+                                  },
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                        if (confirmed != true) {
+                          return;
+                        }
+
+                        final success = await controller.deleteProduct(product.id);
+
+                        if (!success && context.mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(controller.errorMessage.value)));
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
             );
