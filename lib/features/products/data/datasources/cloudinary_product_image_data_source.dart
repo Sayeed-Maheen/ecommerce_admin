@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:typed_data';
 
 import '../../../../core/constants/cloudinary_constants.dart';
 import '../../../../core/errors/app_exception.dart';

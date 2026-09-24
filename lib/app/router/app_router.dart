@@ -7,7 +7,11 @@ import 'package:ecommerce_admin/features/categories/presentation/pages/categorie
 import 'package:ecommerce_admin/features/categories/presentation/pages/category_form_page.dart';
 import 'package:ecommerce_admin/features/products/domain/entities/product.dart';
 import 'package:ecommerce_admin/features/products/presentation/bindings/product_binding.dart';
+import 'package:ecommerce_admin/features/products/presentation/bindings/product_variant_binding.dart';
 import 'package:ecommerce_admin/features/products/presentation/pages/product_form_page.dart';
+import 'package:ecommerce_admin/features/products/presentation/pages/product_variant_form_page.dart';
+import 'package:ecommerce_admin/features/products/presentation/pages/product_variant_route_args.dart';
+import 'package:ecommerce_admin/features/products/presentation/pages/product_variants_page.dart';
 import 'package:ecommerce_admin/features/products/presentation/pages/products_page.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -110,6 +114,39 @@ class AppRouter {
           CategoryBinding().dependencies();
 
           return ProductFormPage(product: product);
+        },
+      ),
+
+      GoRoute(
+        path: '/products/:id/variants',
+        builder: (context, state) {
+          final product = state.extra as Product;
+
+          ProductVariantBinding(productId: product.id).dependencies();
+
+          return ProductVariantsPage(product: product);
+        },
+      ),
+
+      GoRoute(
+        path: '/products/:id/variants/add',
+        builder: (context, state) {
+          final product = state.extra as Product;
+
+          ProductVariantBinding(productId: product.id).dependencies();
+
+          return ProductVariantFormPage(args: ProductVariantRouteArgs(product: product));
+        },
+      ),
+
+      GoRoute(
+        path: '/products/:productId/variants/edit/:variantId',
+        builder: (context, state) {
+          final args = state.extra as ProductVariantRouteArgs;
+
+          ProductVariantBinding(productId: args.product.id).dependencies();
+
+          return ProductVariantFormPage(args: args);
         },
       ),
     ],

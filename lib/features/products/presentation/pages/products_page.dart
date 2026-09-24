@@ -55,6 +55,13 @@ class ProductsPage extends GetView<ProductController> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
+                      tooltip: 'Variants',
+                      icon: const Icon(Icons.tune),
+                      onPressed: () {
+                        context.push('/products/${product.id}/variants', extra: product);
+                      },
+                    ),
+                    IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () {
                         context.push('/products/edit/${product.id}', extra: product);
