@@ -1,4 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce_admin/features/products/data/datasources/product_storage_data_source.dart';
+import 'package:ecommerce_admin/features/products/data/repositories/product_storage_repository_impl.dart';
+import 'package:ecommerce_admin/features/products/domain/repositories/product_storage_repository.dart';
+import 'package:ecommerce_admin/features/products/domain/usecases/delete_product_image_use_case.dart';
+import 'package:ecommerce_admin/features/products/domain/usecases/upload_product_image_use_case.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 
 import '../../data/datasources/product_remote_data_source.dart';
@@ -35,7 +41,24 @@ class ProductBinding extends Bindings {
         Get.find<CreateProductUseCase>(),
         Get.find<UpdateProductUseCase>(),
         Get.find<DeleteProductUseCase>(),
+        Get.find<UploadProductImageUseCase>(),
       ),
+    );
+
+    Get.lazyPut<ProductStorageDataSource>(
+      () => ProductStorageDataSourceImpl(FirebaseStorage.instance),
+    );
+
+    Get.lazyPut<ProductStorageRepository>(
+      () => ProductStorageRepositoryImpl(Get.find<ProductStorageDataSource>()),
+    );
+
+    Get.lazyPut<UploadProductImageUseCase>(
+      () => UploadProductImageUseCase(Get.find<ProductStorageRepository>()),
+    );
+
+    Get.lazyPut<DeleteProductImageUseCase>(
+      () => DeleteProductImageUseCase(Get.find<ProductStorageRepository>()),
     );
   }
 }

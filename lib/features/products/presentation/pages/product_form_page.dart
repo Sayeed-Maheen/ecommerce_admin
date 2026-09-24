@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -36,19 +38,20 @@ class ProductFormPage extends GetView<ProductController> {
           child: ProductForm(
             product: product,
             categories: categoryController.categories,
-            onSubmit: (name, description, categoryId, price, isActive) async {
+            onSubmit: (name, description, categoryId, price, isActive, imageBytes) async {
               final productToSave = Product(
                 id: product?.id ?? '',
                 name: name,
                 description: description,
                 categoryId: categoryId,
+                imageUrl: product?.imageUrl,
                 price: price,
                 isActive: isActive,
               );
 
               final success = product == null
-                  ? await controller.createProduct(productToSave)
-                  : await controller.updateProduct(productToSave);
+                  ? await controller.createProduct(productToSave, imageBytes: imageBytes)
+                  : await controller.updateProduct(productToSave, imageBytes: imageBytes);
 
               if (success && context.mounted) {
                 context.pop();

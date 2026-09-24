@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:ecommerce_admin/core/services/image_service.dart';
 import 'package:ecommerce_admin/features/categories/domain/entities/category.dart';
 import 'package:ecommerce_admin/features/products/domain/entities/product.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +14,7 @@ class ProductForm extends StatefulWidget {
     String categoryId,
     double price,
     bool isActive,
+    Uint8List? imageBytes,
   )
   onSubmit;
 
@@ -27,6 +31,11 @@ class _ProductFormState extends State<ProductForm> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
+
+  Uint8List? _imageBytes;
+  bool _isPickingImage = false;
+
+  final ImageService _imageService = ImageService();
 
   String? _categoryId;
   bool _isActive = true;
@@ -71,10 +80,33 @@ class _ProductFormState extends State<ProductForm> {
         _categoryId!,
         double.parse(_priceController.text.trim()),
         _isActive,
+        _imageBytes,
       );
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    setState(() {
+      _isPickingImage = true;
+    });
+
+    try {
+      final bytes = await _imageService.pickAndCompressImage();
+
+      if (bytes != null) {
+        setState(() {
+          _imageBytes = bytes;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPickingImage = false;
+        });
       }
     }
   }
@@ -86,6 +118,46 @@ class _ProductFormState extends State<ProductForm> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Container(
+            width: double.infinity,
+            height: 220,
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).dividerColor),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: _imageBytes != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.memory(_imageBytes!, fit: BoxFit.cover),
+                  )
+                : widget.product?.imageUrl != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      widget.product!.imageUrl!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
+                  )
+                : const Center(child: Icon(Icons.image_outlined, size: 60)),
+          ),
+
+          const SizedBox(height: 12),
+
+          OutlinedButton.icon(
+            onPressed: _isPickingImage ? null : _pickImage,
+            icon: _isPickingImage
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.photo_library_outlined),
+            label: Text(_imageBytes == null ? 'Select Image' : 'Change Image'),
+          ),
+
+          const SizedBox(height: 20),
+
           TextFormField(
             controller: _nameController,
             decoration: const InputDecoration(
