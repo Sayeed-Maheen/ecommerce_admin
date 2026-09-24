@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "E-Commerce Admin",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=CLOUDINARY_CLOUD_NAME=nthm8wd3",
+        "--dart-define=CLOUDINARY_UPLOAD_PRESET=ecommerce_product_images",
+      ]
+    }
+  ]
+}
